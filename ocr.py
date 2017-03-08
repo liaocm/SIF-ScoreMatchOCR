@@ -79,6 +79,13 @@ def get_data_from_context(context_img):
         player_score_combos.append(p_sc)
     return [[data[x][y] for x in range(len(data)) for y in range(len(data[0]))] for data in zip(player_smpts, player_score_combos)]
 
+def maybe_str_to_int(string):
+    try:
+        val = int(string)
+    except BaseException:
+        val = 0
+    return val
+
 def sanitize_data(raw_data):
     stage1 = []
     for data in raw_data:
@@ -122,8 +129,8 @@ def sanitize_data(raw_data):
         except BaseException:
             delta = 65535
         smpt_deltas.append(delta)
-        scores.append(int(d[2]))
-        combos.append(int(d[3]))
+        scores.append(maybe_str_to_int(d[2]))
+        combos.append(maybe_str_to_int(d[3]))
     
     return list(zip(smpts, smpt_deltas, scores, combos))
 
@@ -132,6 +139,8 @@ def main(path):
         orig = Image.open(path)
     except BaseException:
         sys.exit("Error reading input file.")
+    if orig.width * orig.height < 1080 * 720:
+        sys.exit("Error: the input image's resolution is too low.")
     context_img = crop_image(orig)
     try:
         raw_data = get_data_from_context(context_img)
